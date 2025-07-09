@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    container_name: go-telegram-chat
+    depends_on:
+      - redis
+    ports:
+      - "8082:8082"
+    environment:
+      - REDIS_ADDR=redis:6379

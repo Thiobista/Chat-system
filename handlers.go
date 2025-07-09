@@ -61,6 +61,13 @@ func loginHandler(c *gin.Context) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
         return
     }
+    token, err := GenerateJWT(user.Username)
+if err != nil {
+    c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+    return
+}
+c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
+
     c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }
 
