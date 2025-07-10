@@ -1,13 +1,11 @@
 package main
 
 import (
-    // "context"
     "encoding/json"
     "fmt"
     "sort"
     "github.com/go-redis/redis/v8"
     "github.com/google/uuid"
-     
 )
 
 func SaveUser(user User) error {

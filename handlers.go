@@ -7,7 +7,7 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-// Signup Handler
+// Handles user registration
 func signupHandler(c *gin.Context) {
     var req User
     if err := c.ShouldBindJSON(&req); err != nil {
@@ -20,12 +20,10 @@ func signupHandler(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Username and password required"})
         return
     }
-    // Check if user exists
     if _, err := GetUser(req.Username); err == nil {
         c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
         return
     }
-    // Hash password
     hashed, err := HashPassword(req.Password)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -39,7 +37,7 @@ func signupHandler(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Signup successful"})
 }
 
-// Login Handler
+// Handles user login and JWT issuance
 func loginHandler(c *gin.Context) {
     var req User
     if err := c.ShouldBindJSON(&req); err != nil {
@@ -62,16 +60,14 @@ func loginHandler(c *gin.Context) {
         return
     }
     token, err := GenerateJWT(user.Username)
-if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-    return
-}
-c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
-
-    c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
 }
 
-// Send Direct Message
+// Handles direct (one-to-one) messaging
 func sendDirectMessageHandler(c *gin.Context) {
     var msg Message
     if err := c.ShouldBindJSON(&msg); err != nil {
@@ -93,7 +89,7 @@ func sendDirectMessageHandler(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Message sent"})
 }
 
-// Fetch Chat History
+// Retrieves direct message history between two users
 func getChatHistoryHandler(c *gin.Context) {
     user1 := strings.TrimSpace(c.Query("user1"))
     user2 := strings.TrimSpace(c.Query("user2"))
@@ -108,7 +104,8 @@ func getChatHistoryHandler(c *gin.Context) {
     }
     c.JSON(http.StatusOK, messages)
 }
-// Create group
+
+// Handles group creation
 func createGroupHandler(c *gin.Context) {
     var req struct {
         Name    string   `json:"name"`
@@ -126,7 +123,7 @@ func createGroupHandler(c *gin.Context) {
     c.JSON(200, group)
 }
 
-// Send a message to group
+// Handles sending messages to a group
 func sendGroupMessageHandler(c *gin.Context) {
     var msg GroupMessage
     if err := c.ShouldBindJSON(&msg); err != nil || msg.GroupID == "" || msg.From == "" || msg.Message == "" {
@@ -141,7 +138,7 @@ func sendGroupMessageHandler(c *gin.Context) {
     c.JSON(200, gin.H{"message": "Message sent"})
 }
 
-// Get group chat history
+// Retrieves group message history
 func getGroupMessagesHandler(c *gin.Context) {
     groupID := c.Query("group_id")
     if groupID == "" {
@@ -155,7 +152,8 @@ func getGroupMessagesHandler(c *gin.Context) {
     }
     c.JSON(200, messages)
 }
-// Send a broadcast message
+
+// Handles broadcast messaging
 func sendBroadcastMessageHandler(c *gin.Context) {
     var msg BroadcastMessage
     if err := c.ShouldBindJSON(&msg); err != nil || msg.From == "" || msg.Message == "" {
@@ -170,7 +168,7 @@ func sendBroadcastMessageHandler(c *gin.Context) {
     c.JSON(200, gin.H{"message": "Broadcast sent"})
 }
 
-// Get all broadcast messages
+// Retrieves all broadcast messages
 func getBroadcastMessagesHandler(c *gin.Context) {
     messages, err := GetBroadcastMessages()
     if err != nil {

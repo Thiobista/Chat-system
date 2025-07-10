@@ -6,6 +6,7 @@ import (
     "github.com/go-redis/redis/v8"
 )
 
+// Global Redis and context, initialized at startup
 var (
     rdb *redis.Client
     ctx context.Context
@@ -14,18 +15,20 @@ var (
 func main() {
     ctx = context.Background()
     rdb = redis.NewClient(&redis.Options{
-         Addr: "localhost:6379",
+        Addr:     "localhost:6379",
         Password: "",
         DB:       0,
     })
+
     router := gin.Default()
 
+    // Public endpoints
     router.POST("/signup", signupHandler)
     router.POST("/login", loginHandler)
 
-      auth := router.Group("/")
+    // Protected endpoints (require JWT)
+    auth := router.Group("/")
     auth.Use(AuthMiddleware())
-    
     {
         auth.POST("/message", sendDirectMessageHandler)
         auth.GET("/messages", getChatHistoryHandler)
